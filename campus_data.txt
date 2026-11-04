@@ -1,0 +1,123 @@
+# ==============================================================================
+# CHANDIGARH UNIVERSITY CAMPUS NAVIGATION DATA
+# Campus: Chandigarh University (Gharuan, Mohali, Punjab)
+#
+# This data file defines:
+#   1. VERIFIED CAMPUS LANDMARKS (with categories)
+#   2. INTERNAL WALKING ROAD JUNCTIONS
+#   3. WALKING PATHS & DISTANCES (in metres)
+#
+# Designed for both C++ Dijkstra verification and future Web Integration (JSON/CSV)
+# ==============================================================================
+
+[LANDMARKS]
+# Name | Category
+Gate 1 | Campus Gate
+Gate 2 | Campus Gate
+Gate 4 | Campus Gate
+A1 | Academic Block (A)
+A2 | Academic Block (A)
+A3 | Academic Block (A)
+B1 | Academic Block (B)
+B2 | Academic Block (B)
+B3 | Academic Block (B)
+B4 | Academic Block (B)
+C1 | Academic Block (C)
+C2 | Academic Block (C)
+C3 | Academic Block (C)
+D1 | Academic Block (D)
+D2 | Academic Block (D)
+D3 | Academic Block (D)
+D4 | Academic Block (D)
+D5 | Academic Block (D)
+D6 | Academic Block (D)
+D7 | Academic Block (D)
+Sukhna Hostel | Student Residence
+LC Hostel | Student Residence
+Boys Hostel | Student Residence
+Fountain Park | Campus Amenities & Sports
+Basketball Court | Campus Amenities & Sports
+CU Bus Parking | Campus Amenities & Sports
+University Ground | Campus Amenities & Sports
+Shopping Complex | Campus Amenities & Sports
+
+[ROAD_JUNCTIONS]
+# Junction_ID | Description
+J_Gate1 | Gate 1 & Bus Parking Roundabout
+J_MainAvenue | Main Entrance Walking Avenue
+J_Gate2 | Gate 2 Lateral Transit Access
+J_BlockA | Academic Block A Access Point
+J_FountainPark | Central Fountain Park Roundabout
+J_BlockB | Academic Block B Cluster Lane
+J_ShoppingComplex | Shopping Complex Commercial Zone
+J_BlockC | Academic Block C Central Walkway
+J_AcademicSpine | Main Inter-Block Academic Promenade
+J_BlockD_North | Academic Block D North Corridor (D1-D3)
+J_BlockD_South | Academic Block D South Corridor (D4-D7)
+J_SportsZone | University Ground & Basketball Court Access
+J_Sukhna | Sukhna Residential Northern Pathway
+J_HostelHub | LC & Boys Hostel Central Hub
+J_Gate4 | Gate 4 Rear Transit Intersection
+
+[CONNECTIONS]
+# NodeA | NodeB | WalkingDistanceInMetres
+Gate 1 | J_Gate1 | 30
+CU Bus Parking | J_Gate1 | 80
+J_Gate1 | J_MainAvenue | 120
+Gate 2 | J_Gate2 | 40
+J_Gate2 | J_MainAvenue | 160
+J_Gate2 | J_ShoppingComplex | 190
+J_MainAvenue | J_BlockA | 100
+A1 | J_BlockA | 40
+A2 | J_BlockA | 50
+A3 | J_BlockA | 60
+A1 | A2 | 35
+A2 | A3 | 35
+J_BlockA | J_FountainPark | 90
+Fountain Park | J_FountainPark | 25
+J_FountainPark | J_BlockB | 80
+B1 | J_BlockB | 30
+B2 | J_BlockB | 40
+B3 | J_BlockB | 50
+B4 | J_BlockB | 60
+B1 | B2 | 30
+B2 | B3 | 30
+B3 | B4 | 30
+J_BlockB | J_ShoppingComplex | 70
+Shopping Complex | J_ShoppingComplex | 20
+J_ShoppingComplex | J_BlockC | 110
+J_BlockB | J_BlockC | 120
+C1 | J_BlockC | 35
+C2 | J_BlockC | 45
+C3 | J_BlockC | 55
+C1 | C2 | 30
+C2 | C3 | 30
+J_BlockC | J_AcademicSpine | 100
+J_AcademicSpine | J_BlockD_North | 80
+D1 | J_BlockD_North | 30
+D2 | J_BlockD_North | 40
+D3 | J_BlockD_North | 50
+D1 | D2 | 30
+D2 | D3 | 30
+J_BlockD_North | J_BlockD_South | 90
+D4 | J_BlockD_South | 30
+D5 | J_BlockD_South | 40
+D6 | J_BlockD_South | 50
+D7 | J_BlockD_South | 60
+D4 | D5 | 30
+D5 | D6 | 30
+D6 | D7 | 30
+J_AcademicSpine | J_SportsZone | 110
+Basketball Court | J_SportsZone | 40
+University Ground | J_SportsZone | 70
+J_BlockD_South | J_SportsZone | 130
+J_FountainPark | J_Sukhna | 220
+J_BlockB | J_Sukhna | 210
+Sukhna Hostel | J_Sukhna | 50
+J_SportsZone | J_HostelHub | 180
+J_BlockD_South | J_HostelHub | 190
+LC Hostel | J_HostelHub | 60
+Boys Hostel | J_HostelHub | 70
+LC Hostel | Boys Hostel | 50
+J_HostelHub | J_Gate4 | 90
+Gate 4 | J_Gate4 | 30
