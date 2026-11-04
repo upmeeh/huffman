@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An interactive Huffman text compression visualizer.">
+  <title>Huffman / compress with intent</title>
+  <style>
+    :root {
+      --ink: #171717;
+      --muted: #77736e;
+      --paper: #f5f5f2;
+      --card: rgba(255, 255, 255, .68);
+      --line: rgba(23, 23, 23, .12);
+      --accent: #c56f55;
+      --accent-dark: #9e4f3c;
+      --shadow: 0 24px 70px rgba(37, 28, 23, .10);
+      --ease: cubic-bezier(.22, 1, .36, 1);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .shell { max-width: 1440px; margin: auto; padding: 28px clamp(22px, 5vw, 78px) 80px; }
+    header { display: flex; justify-content: space-between; align-items: center; }
+    .brand { display: flex; align-items: center; gap: 11px; font-size: 13px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+    .mark { width: 28px; height: 28px; border-radius: 50%; background: var(--ink); position: relative; }
+    .mark::after { content: ""; position: absolute; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); top: 10px; left: 10px; }
+    nav { color: var(--muted); font-size: 13px; }
+    nav a { color: inherit; text-decoration: none; }
+    nav a:hover { color: var(--accent-dark); }
+    .hero { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr); gap: clamp(35px, 8vw, 130px); align-items: end; padding: clamp(90px, 14vh, 175px) 0 80px; }
+    .eyebrow { color: var(--accent-dark); font-size: 12px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    h1 { max-width: 850px; margin: 18px 0 0; font-size: clamp(58px, 9.2vw, 145px); line-height: .87; letter-spacing: -.085em; }
+    .intro { max-width: 390px; margin: 0 0 7px; color: var(--muted); font-size: 17px; line-height: 1.55; }
+    .workspace { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 18px; }
+    .panel, .result-card { border: 1px solid var(--line); border-radius: 26px; background: var(--card); box-shadow: var(--shadow); backdrop-filter: blur(18px); }
+    .panel { padding: clamp(22px, 3vw, 40px); }
+    .panel-label { display: flex; justify-content: space-between; margin-bottom: 20px; color: var(--muted); font-size: 12px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+    textarea { display: block; width: 100%; min-height: 310px; padding: 0; border: 0; outline: 0; resize: vertical; color: var(--ink); background: transparent; font: 500 24px/1.35 Georgia, serif; }
+    textarea::placeholder { color: #aaa59f; }
+    .control-row { display: flex; justify-content: space-between; align-items: center; gap: 15px; padding-top: 20px; border-top: 1px solid var(--line); }
+    .counter { color: var(--muted); font-size: 13px; }
+    button { border: 0; border-radius: 999px; padding: 15px 23px; color: #fff; background: var(--ink); font: 750 13px inherit; cursor: pointer; transition: transform .35s var(--ease), background .35s var(--ease); }
+    button:hover { background: var(--accent-dark); transform: translateY(-2px); }
+    button:active { transform: scale(.95); }
+    button:disabled { cursor: wait; opacity: .6; transform: none; }
+    .empty { min-height: 405px; display: grid; place-items: center; color: var(--muted); text-align: center; }
+    .empty p { max-width: 230px; line-height: 1.6; }
+    .results { display: none; gap: 18px; }
+    .results.visible { display: grid; animation: reveal .8s var(--ease) both; }
+    @keyframes reveal { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+    .result-card { padding: 26px; }
+    .result-card h2 { margin: 0 0 18px; font-size: 18px; letter-spacing: -.03em; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-bottom: 12px; }
+    .stat { padding: 15px; border-radius: 15px; background: rgba(245,245,242,.85); }
+    .stat b { display: block; font-size: 24px; letter-spacing: -.06em; }
+    .stat span { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+    .bar-wrap { padding: 14px 0 4px; }
+    .bar { height: 10px; overflow: hidden; position: relative; border-radius: 20px; background: #e6e2de; }
+    .bar i { position: absolute; inset: 0 auto 0 0; display: block; border-radius: 20px; transition: width 1s var(--ease); }
+    .bar i:first-child { background: #aaa59f; }
+    .bar i:last-child { background: var(--accent); }
+    .bar-key { display: flex; justify-content: space-between; margin-top: 8px; color: var(--muted); font-size: 11px; }
+    .stream-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+    .stream { min-width: 0; padding: 14px; border-radius: 15px; background: rgba(245,245,242,.85); }
+    .stream-label { display: block; margin-bottom: 8px; color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .stream-value { display: block; max-height: 92px; overflow: auto; overflow-wrap: anywhere; color: var(--ink); font: 11px/1.7 ui-monospace, monospace; }
+    .stream:last-child .stream-value { color: var(--accent-dark); }
+    .stream-value.reveal { animation: streamReveal .9s var(--ease) both; }
+    @keyframes streamReveal { from { opacity: 0; clip-path: inset(0 100% 0 0); } to { opacity: 1; clip-path: inset(0); } }
+    .table-wrap { max-height: 230px; overflow: auto; border: 1px solid var(--line); border-radius: 14px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 11px 13px; border-bottom: 1px solid var(--line); text-align: left; }
+    th { color: var(--muted); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+    tr:last-child td { border-bottom: 0; }
+    code { padding: 4px 7px; border-radius: 6px; color: var(--accent-dark); background: #f0dfd9; font-family: ui-monospace, monospace; }
+    .binary { overflow-wrap: anywhere; color: var(--accent-dark); font: 12px/1.7 ui-monospace, monospace; }
+    .verify { color: #47745b; font-size: 13px; font-weight: 700; }
+    .error { display: none; margin-top: 14px; color: #a33e36; font-size: 13px; }
+    @media (max-width: 800px) {
+      .hero, .workspace { grid-template-columns: 1fr; }
+      .hero { padding-top: 90px; }
+      .intro { max-width: 500px; }
+      textarea { min-height: 220px; }
+      .stream-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div class="brand"><span class="mark"></span> Huffman study</div>
+      <nav><a href="/learn">See the algorithm build →</a></nav>
+    </header>
+
+    <section class="hero">
+      <div>
+        <div class="eyebrow">Greedy algorithms, made visible</div>
+        <h1>Make every<br><em>bit</em> count.</h1>
+      </div>
+      <p class="intro">A calm, interactive look at Huffman coding — from character frequencies to the smallest possible binary story.</p>
+    </section>
+
+    <section class="workspace" aria-label="Compression workspace">
+      <div class="panel">
+        <div class="panel-label"><span>01 / Your message</span><span id="charCount">0 chars</span></div>
+        <textarea id="inputText" maxlength="5000" placeholder="Type or paste a sentence here...">The best code is clear.</textarea>
+        <div class="control-row">
+          <span class="counter">UTF-8 text · local processing</span>
+          <button id="compressButton" type="button">Compress text <span aria-hidden="true">→</span></button>
+        </div>
+        <div id="error" class="error" role="alert"></div>
+      </div>
+
+      <div class="panel empty" id="emptyState">
+        <p>Your compression story will unfold here — frequency, code, and proof.</p>
+      </div>
+
+      <div class="results" id="results" aria-live="polite">
+        <div class="result-card">
+          <h2>02 / The measure</h2>
+          <div class="stats">
+            <div class="stat"><b id="originalBits">0</b><span>original bits</span></div>
+            <div class="stat"><b id="compressedBits">0</b><span>encoded bits</span></div>
+            <div class="stat"><b id="ratio">0%</b><span>of original</span></div>
+          </div>
+          <div class="bar-wrap">
+            <div class="bar"><i id="originalBar" style="width: 100%"></i><i id="compressedBar" style="width: 0%"></i></div>
+            <div class="bar-key"><span>Original UTF-8</span><span>Huffman encoded</span></div>
+          </div>
+          <div class="stream-grid">
+            <div class="stream">
+              <span class="stream-label">Original bytes</span>
+              <code class="stream-value" id="originalBinary"></code>
+            </div>
+            <div class="stream">
+              <span class="stream-label">Compressed bits · grouped for reading</span>
+              <code class="stream-value" id="compressedBinary"></code>
+            </div>
+          </div>
+          <p class="verify" id="verification"></p>
+        </div>
+        <div class="result-card">
+          <h2>03 / Frequency & code</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Character</th><th>Frequency</th><th>Binary code</th></tr></thead>
+              <tbody id="codeTable"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="result-card">
+          <h2>04 / Encoded output</h2>
+          <div class="binary" id="encodedOutput"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script>
+    const input = document.getElementById("inputText");
+    const count = document.getElementById("charCount");
+    const button = document.getElementById("compressButton");
+    const error = document.getElementById("error");
+    const emptyState = document.getElementById("emptyState");
+    const results = document.getElementById("results");
+    const printable = (character) => character === " " ? "Space" : character === "\n" ? "New line" : character === "\t" ? "Tab" : character;
+
+    function updateCount() {
+      count.textContent = `${input.value.length.toLocaleString()} chars`;
+    }
+
+    function render(data) {
+      document.getElementById("originalBits").textContent = data.original_bits.toLocaleString();
+      document.getElementById("compressedBits").textContent = data.compressed_bits.toLocaleString();
+      document.getElementById("ratio").textContent = `${(data.compression_ratio * 100).toFixed(1)}%`;
+      const max = Math.max(data.original_bits, 1);
+      document.getElementById("originalBar").style.width = `${Math.min(100, data.original_bits / max * 100)}%`;
+      document.getElementById("compressedBar").style.width = `${Math.min(100, data.compressed_bits / max * 100)}%`;
+      document.getElementById("verification").textContent = data.decoded_text === data.original_text ? "✓ Decoded output matches the original" : "Could not verify decoded output";
+      const originalBinary = document.getElementById("originalBinary");
+      const compressedBinary = document.getElementById("compressedBinary");
+      originalBinary.textContent = data.original_binary || "∅ (empty input)";
+      compressedBinary.textContent = data.encoded_binary_grouped || "∅ (empty input)";
+      [originalBinary, compressedBinary].forEach((stream) => {
+        stream.classList.remove("reveal");
+        requestAnimationFrame(() => stream.classList.add("reveal"));
+      });
+      document.getElementById("encodedOutput").textContent = data.encoded_binary || "∅ (empty input)";
+      const frequencyRows = Object.entries(data.frequency_map)
+        .sort(([characterA, frequencyA], [characterB, frequencyB]) =>
+          frequencyB - frequencyA || characterA.localeCompare(characterB)
+        );
+      document.getElementById("codeTable").innerHTML = frequencyRows.map(([character, frequency]) => `
+        <tr><td>${escapeHtml(printable(character))}</td><td>${frequency}</td><td><code>${data.codes[character]}</code></td></tr>
+      `).join("") || '<tr><td colspan="3">No characters to encode.</td></tr>';
+      emptyState.style.display = "none";
+      results.classList.remove("visible");
+      requestAnimationFrame(() => results.classList.add("visible"));
+    }
+
+    function escapeHtml(value) {
+      return value.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character]);
+    }
+
+    async function compress() {
+      error.style.display = "none";
+      button.disabled = true;
+      button.textContent = "Compressing...";
+      try {
+        const response = await fetch("/api/compress", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: input.value })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Compression failed.");
+        render(data);
+      } catch (requestError) {
+        error.textContent = requestError.message;
+        error.style.display = "block";
+      } finally {
+        button.disabled = false;
+        button.innerHTML = 'Compress text <span aria-hidden="true">→</span>';
+      }
+    }
+
+    input.addEventListener("input", updateCount);
+    button.addEventListener("click", compress);
+    updateCount();
+  </script>
+</body>
+</html>
