@@ -356,7 +356,7 @@ class CompressionHandler(BaseHTTPRequestHandler):
 
 
 def run_server() -> None:
-    port = int(os.environ.get(""PORT", 8000))
+port = int(os.environ.get("PORT", 8000))
     server = ThreadingHTTPServer(("0.0.0.0", port), CompressionHandler)
     print(f"Huffman Text Compression running on port {port}")
     try:
