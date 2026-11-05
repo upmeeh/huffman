@@ -1,0 +1,17 @@
+
+{
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/templates/index.html"
+    },
+    {
+      "source": "/learn",
+      "destination": "/templates/learn.html"
+    },
+    {
+      "source": "/api/compress",
+      "destination": "/api?route=/api/compress"
+    }
+  ]
+}
